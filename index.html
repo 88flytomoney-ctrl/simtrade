@@ -18,11 +18,39 @@
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen">
 
-<div class="max-w-5xl mx-auto px-4 py-8">
+<!-- ===================== AUTH GATE ===================== -->
+<div id="authGate" class="fixed inset-0 z-50 bg-gray-950 flex items-center justify-center">
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="text-5xl mb-3">🔒</div>
+      <h2 class="text-xl font-bold mb-1">SimTrade 登入</h2>
+      <p class="text-gray-500 text-sm">請輸入密碼以查看交易數據</p>
+    </div>
+    <form id="authForm" class="space-y-4">
+      <input id="authPassword" type="password" placeholder="密碼" required autofocus
+             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
+      <button type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-3 text-sm transition">
+        🔓 Unlock
+      </button>
+    </form>
+    <p id="authError" class="text-red-400 text-sm text-center mt-3 hidden">❌ 密碼錯誤，請重試</p>
+    <p class="text-gray-600 text-xs text-center mt-4">SHA-256 protected · Web Crypto API</p>
+  </div>
+</div>
+
+<!-- ===================== MAIN CONTENT (hidden until authed) ===================== -->
+<div id="appContent" class="max-w-5xl mx-auto px-4 py-8" style="display:none;">
 
   <!-- ===================== HEADER ===================== -->
   <header class="mb-8">
-    <h1 class="text-3xl font-bold">📈 SimTrade <span class="text-gray-500 font-normal text-base align-middle">Simulated Stock Trading</span></h1>
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold">📈 SimTrade <span class="text-gray-500 font-normal text-base align-middle">Simulated Stock Trading</span></h1>
+      <button id="btnLock" type="button"
+              class="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-300 transition">
+        🔒 Lock
+      </button>
+    </div>
     <p class="text-gray-400 text-sm mt-1">記錄模擬買賣 · 自動追蹤持倉與盈虧 (HKD / USD) · 每日 GitHub Actions 更新收盤價</p>
     <p class="text-xs text-gray-500 mt-2">
       <span id="lastUpdated">載入中…</span>
@@ -215,6 +243,82 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════
+// 🔐 AUTHENTICATION GATE — SHA-256 password via Web Crypto API
+// ═══════════════════════════════════════════════════════════════════════
+//
+// To generate a new password hash, run any of these:
+//   Python:  python3 -c "import hashlib; print(hashlib.sha256('MyPass'.encode()).hexdigest())"
+//   Node:    node -e "console.log(require('crypto').createHash('sha256').update('MyPass').digest('hex'))"
+//   Bash:    echo -n 'MyPass' | sha256sum | cut -d' ' -f1
+// Then paste the 64-char hex string into PASSWORD_HASH below.
+//
+// Current password hash = SHA-256('Password04')
+const PASSWORD_HASH = '574a14bdbb39813e68cf9de4fc163586cc6491bf34d9ceac7e89378af66c496c';
+const AUTH_TOKEN    = 'simtrade.auth.v1';
+
+async function sha256Hex(text) {
+  const buf = new TextEncoder().encode(text);
+  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function showLockScreen() {
+  document.getElementById('authGate').style.display = 'flex';
+  document.getElementById('appContent').style.display = 'none';
+  const pwInput = document.getElementById('authPassword');
+  pwInput.value = '';
+  pwInput.focus();
+  document.getElementById('authError').classList.add('hidden');
+}
+
+function unlockApp() {
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('appContent').style.display = 'block';
+}
+
+document.getElementById('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('authPassword').value;
+  const hash = await sha256Hex(input);
+  if (hash === PASSWORD_HASH) {
+    sessionStorage.setItem(AUTH_TOKEN, '1');
+    unlockApp();
+    // Trigger initial data load now that the app is visible
+    loadLocal(); renderHistory(); loadDeployedTrades(); loadSummary();
+  } else {
+    document.getElementById('authError').classList.remove('hidden');
+    document.getElementById('authPassword').select();
+  }
+});
+
+document.getElementById('btnLock').addEventListener('click', () => {
+  sessionStorage.removeItem(AUTH_TOKEN);
+  showLockScreen();
+});
+
+// ── Alert if Web Crypto not available (non-HTTPS context) ──────────
+if (!window.crypto || !window.crypto.subtle) {
+  document.getElementById('authForm').addEventListener('submit', function cryptoFallback(e) {
+    e.preventDefault();
+    alert('⚠️ Web Crypto API 需要 HTTPS 環境。請以 https:// 開啟本頁面，或在 localhost 測試。');
+  }, true);
+}
+
+// ── Boot: check if already authenticated this session ───────────────
+function authBoot() {
+  if (sessionStorage.getItem(AUTH_TOKEN) === '1') {
+    unlockApp();
+    return true;
+  }
+  showLockScreen();
+  return false;
+}
+const _isAuthed = authBoot();
+
+// ═══════════════════════════════════════════════════════════════════════
+// APP STATE & LOGIC
+// ═══════════════════════════════════════════════════════════════════════
 // ─── State ────────────────────────────────────────────────────────
 const STORE_KEY = 'simtrade.trades.v1';
 let trades = [];
@@ -571,10 +675,14 @@ document.getElementById('btnClear').addEventListener('click', () => {
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────
-loadLocal();
-renderHistory();        // synchronous first paint from localStorage
-loadDeployedTrades();  // async: falls back to deployed trades.json if localStorage empty
-loadSummary();         // async: loads price cache then renders dashboard
+// Only auto-load data if already authed. Otherwise the auth form's
+// submit handler triggers the same load sequence after unlock.
+if (_isAuthed) {
+  loadLocal();
+  renderHistory();        // synchronous first paint from localStorage
+  loadDeployedTrades();  // async: falls back to deployed trades.json if localStorage empty
+  loadSummary();         // async: loads price cache then renders dashboard
+}
 // Both async paths call renderDashboard() when done, so the final dashboard
 // always reflects the eventual trades + price state, regardless of completion order.
 </script>
