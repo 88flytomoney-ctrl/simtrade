@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>📈 SimTrade — 模擬交易系統</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .fade-in { animation: fade .25s ease-in; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .pill-buy { color:#22c55e; background: rgba(34,197,94,.12); padding:1px 10px; border-radius:9999px; font-weight:600; font-size:.8rem; }
+  .pill-sell{ color:#ef4444; background: rgba(239,68,68,.12); padding:1px 10px; border-radius:9999px; font-weight:600; font-size:.8rem; }
+</style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold">📈 SimTrade <span class="text-gray-500 font-normal text-base align-middle">Simulated Stock Trading</span></h1>
+    <p class="text-gray-400 text-sm mt-1">記錄模擬買賣 · 自動追蹤持倉與盈虧 (HKD / USD) · 每日 GitHub Actions 更新收盤價</p>
+    <p class="text-xs text-gray-500 mt-2">
+      <span id="lastUpdated">載入中…</span>
+    </p>
+  </header>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+    <!-- HKD Card -->
+    <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold">🇭🇰 香港股票 <span class="text-xs text-gray-500">(HKD)</span></h2>
+      </div>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-gray-400">投入資本</span><span class="num" id="hkInvested">0</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">持倉市值</span><span class="num" id="hkMktValue">0</span></div>
+        <div class="flex justify-between border-t border-gray-800 pt-2 mt-1">
+          <span class="text-gray-400">已實現盈虧</span><span class="num" id="hkRealized">0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">未實現盈虧</span><span class="num" id="hkUnrealized">0</span>
+        </div>
+        <div class="flex justify-between font-semibold border-t border-gray-800 pt-2 mt-1">
+          <span>總盈虧</span>
+          <span class="num" id="hkTotal">0</span>
+        </div>
+        <div class="flex justify-between text-xs">
+          <span class="text-gray-500">總回報率</span>
+          <span class="num" id="hkPct">0.00%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- USD Card -->
+    <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold">🇺🇸 美國股票 <span class="text-xs text-gray-500">(USD)</span></h2>
+      </div>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-gray-400">投入資本</span><span class="num" id="usInvested">0</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">持倉市值</span><span class="num" id="usMktValue">0</span></div>
+        <div class="flex justify-between border-t border-gray-800 pt-2 mt-1">
+          <span class="text-gray-400">已實現盈虧</span><span class="num" id="usRealized">0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">未實現盈虧</span><span class="num" id="usUnrealized">0</span>
+        </div>
+        <div class="flex justify-between font-semibold border-t border-gray-800 pt-2 mt-1">
+          <span>總盈虧</span>
+          <span class="num" id="usTotal">0</span>
+        </div>
+        <div class="flex justify-between text-xs">
+          <span class="text-gray-500">總回報率</span>
+          <span class="num" id="usPct">0.00%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOLDINGS TABLE ===================== -->
+  <section class="mb-10">
+    <h2 class="text-xl font-semibold mb-3">📦 持倉明細</h2>
+    <div class="overflow-x-auto bg-gray-900 rounded-lg border border-gray-800">
+      <table class="w-full text-sm" id="holdingsTable">
+        <thead class="bg-gray-800 text-gray-400">
+          <tr>
+            <th class="px-3 py-2 text-left">Market</th>
+            <th class="px-3 py-2 text-left">Symbol</th>
+            <th class="px-3 py-2 text-right">Volume</th>
+            <th class="px-3 py-2 text-right">Avg Cost</th>
+            <th class="px-3 py-2 text-right">Cur Price</th>
+            <th class="px-3 py-2 text-right">Mkt Value</th>
+            <th class="px-3 py-2 text-right">Realized</th>
+            <th class="px-3 py-2 text-right">Unrealized</th>
+            <th class="px-3 py-2 text-right">Total PnL</th>
+            <th class="px-3 py-2 text-center">Price Date</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800 num">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+      <p id="noHoldings" class="text-gray-500 text-sm text-center py-6 hidden">— 尚無持倉 —</p>
+    </div>
+  </section>
+
+  <!-- ===================== RECORD TRADE FORM ===================== -->
+  <section class="mb-10">
+    <h2 class="text-xl font-semibold mb-3">📝 記錄交易</h2>
+    <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
+      <form id="tradeForm" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Market</label>
+          <select id="fMarket" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
+            <option value="HK">🇭🇰 HK Stock</option>
+            <option value="US">🇺🇸 US Stock</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Symbol / 代號</label>
+          <input id="fSymbol" type="text" placeholder="00700 / AAPL" required
+                 class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm font-mono">
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Action</label>
+          <select id="fType" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
+            <option value="BUY">📈 BUY</option>
+            <option value="SELL">📉 SELL</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Volume (Shares)</label>
+          <input id="fVolume" type="number" step="any" min="0" placeholder="500" required
+                 class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm num">
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Executed Price</label>
+          <input id="fPrice" type="number" step="any" min="0" placeholder="350.00" required
+                 class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm num">
+        </div>
+
+        <div class="col-span-2 md:col-span-3">
+          <label class="block text-xs text-gray-400 mb-1">Notes (optional)</label>
+          <input id="fNotes" type="text" placeholder="策略 / 備註"
+                 class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">&nbsp;</label>
+          <button type="submit"
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-4 py-2 text-sm transition">
+            ＋ Add Trade
+          </button>
+        </div>
+      </form>
+
+      <!-- Toolbar: import/export -->
+      <div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-gray-800 text-xs text-gray-400">
+        <span class="self-center">💾 Auto-saved to browser localStorage. </span>
+        <button id="btnExport" type="button" class="bg-gray-800 hover:bg-gray-700 rounded px-3 py-1">⬇ Export trades.json</button>
+        <label class="bg-gray-800 hover:bg-gray-700 rounded px-3 py-1 cursor-pointer">
+          ⬆ Import trades.json
+          <input id="fileImport" type="file" accept=".json" class="hidden">
+        </label>
+        <button id="btnClear" type="button" class="bg-gray-800 hover:bg-red-900 rounded px-3 py-1">🗑 Clear all</button>
+        <span class="self-center ml-auto">To update the live dashboard, commit exported <code class="text-gray-300">data/trades.json</code> and push.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TRADE HISTORY ===================== -->
+  <section class="mb-10">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-xl font-semibold">📜 交易記錄</h2>
+      <input id="searchBox" type="search" placeholder="🔍 搜尋 symbol / notes…"
+             class="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm w-64">
+    </div>
+    <div class="overflow-x-auto bg-gray-900 rounded-lg border border-gray-800">
+      <table class="w-full text-sm" id="historyTable">
+        <thead class="bg-gray-800 text-gray-400">
+          <tr>
+            <th class="px-3 py-2 text-left">Timestamp</th>
+            <th class="px-3 py-2 text-left">Market</th>
+            <th class="px-3 py-2 text-left">Symbol</th>
+            <th class="px-3 py-2 text-center">Type</th>
+            <th class="px-3 py-2 text-right">Volume</th>
+            <th class="px-3 py-2 text-right">Price</th>
+            <th class="px-3 py-2 text-right">Value</th>
+            <th class="px-3 py-2 text-left">Notes</th>
+            <th class="px-3 py-2 text-center">—</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800 num">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+      <p id="noTrades" class="text-gray-500 text-sm text-center py-6 hidden">— 尚無交易記錄 —</p>
+    </div>
+  </section>
+
+  <footer class="text-xs text-gray-500 mt-10 text-center">
+    Prices: Sina Finance (HK) + Yahoo Finance (US) · Updated daily by GitHub Actions · Not investment advice
+  </footer>
+
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────
+const STORE_KEY = 'simtrade.trades.v1';
+let trades = [];
+let summary = null;
+
+// ─── Persistence ──────────────────────────────────────────────────
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) trades = JSON.parse(raw);
+  } catch (_) { trades = []; }
+}
+function saveLocal() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(trades, null, 2));
+}
+
+// ─── Fetch the deployed PnL summary on load ───────────────────────
+async function loadSummary() {
+  // GitHub Pages serves /simtrade/data/pnl_summary.json under the repo.
+  // For local dev it's ./data/pnl_summary.json.
+  const candidates = [
+    './data/pnl_summary.json',
+    '/simtrade/data/pnl_summary.json',
+  ];
+  for (const url of candidates) {
+    try {
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) continue;
+      summary = await r.json();
+      renderDashboard();
+      return;
+    } catch (_) {}
+  }
+  // Fallbacks failed — local-only mode
+  document.getElementById('lastUpdated').textContent = '⚠️ 未載入 pnl_summary.json（純本地模式）';
+}
+// ─── Fetch the deployed trades.json on load ───────────────────────
+async function loadDeployedTrades() {
+  // Only fetch once; if localStorage has trades we keep those.
+  if (trades.length > 0) { renderHistory(); return; }
+  const candidates = ['./data/trades.json', '/simtrade/data/trades.json'];
+  for (const url of candidates) {
+    try {
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) continue;
+      const data = await r.json();
+      if (Array.isArray(data) && data.length > 0) {
+        trades = data;
+        saveLocal();
+        renderHistory();
+        return;
+      }
+    } catch (_) {}
+  }
+  renderHistory();
+}
+
+// ─── Formatting helpers ───────────────────────────────────────────
+function fmt(n, dp = 2) {
+  if (n == null || isNaN(n)) return '—';
+  return Number(n).toLocaleString('en-HK', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+}
+function colorize(n) {
+  if (n == null || isNaN(n)) return 'text-gray-400';
+  if (n > 0) return 'text-green-400';
+  if (n < 0) return 'text-red-400';
+  return 'text-gray-300';
+}
+
+// ─── Dashboard render ─────────────────────────────────────────────
+function renderDashboard() {
+  if (!summary) return;
+  const lu = summary.last_updated;
+  document.getElementById('lastUpdated').textContent =
+    lu ? `最後更新 (prices): ${lu.replace('T',' ').replace(/\+.*$/,' HKT')}` : '';
+
+  setText('hkInvested',  fmt(summary.hk_total_invested));
+  setText('hkMktValue',  fmt(summary.hk_current_value));
+  setText('hkRealized',  fmt(summary.hk_realized_pnl), true);
+  setText('hkUnrealized',fmt(summary.hk_unrealized_pnl), true);
+  setText('hkTotal',     fmt(summary.hk_realized_pnl + summary.hk_unrealized_pnl), true);
+  setText('hkPct',       pct(summary.hk_total_invested, summary.hk_realized_pnl + summary.hk_unrealized_pnl));
+
+  setText('usInvested',  fmt(summary.us_total_invested));
+  setText('usMktValue',  fmt(summary.us_current_value));
+  setText('usRealized',  fmt(summary.us_realized_pnl), true);
+  setText('usUnrealized',fmt(summary.us_unrealized_pnl), true);
+  setText('usTotal',     fmt(summary.us_realized_pnl + summary.us_unrealized_pnl), true);
+  setText('usPct',       pct(summary.us_total_invested, summary.us_realized_pnl + summary.us_unrealized_pnl));
+
+  renderHoldings();
+}
+function setText(id, val, color=false) {
+  const el = document.getElementById(id);
+  el.textContent = val;
+  if (color) el.className = 'num ' + (
+    /^\-/.test(val) ? 'text-red-400' :
+    /^0(\.0+)?$/.test(val) ? 'text-gray-300' :
+    'text-green-400'
+  );
+}
+function pct(invested, pnl) {
+  if (!invested || invested === 0) return '0.00%';
+  return (pnl / invested * 100).toFixed(2) + '%';
+}
+
+function renderHoldings() {
+  const tbody = document.querySelector('#holdingsTable tbody');
+  tbody.innerHTML = '';
+  const holdings = summary?.holdings || {};
+  const keys = Object.keys(holdings);
+  document.getElementById('noHoldings').classList.toggle('hidden', keys.length > 0);
+
+  for (const k of keys) {
+    const h = holdings[k];
+    const tr = document.createElement('tr');
+    tr.className = 'fade-in';
+    tr.innerHTML = `
+      <td class="px-3 py-2">${h.market}</td>
+      <td class="px-3 py-2 font-mono">${esc(h.symbol)}</td>
+      <td class="px-3 py-2 text-right">${fmt(h.holding_volume, 0)}</td>
+      <td class="px-3 py-2 text-right">${fmt(h.avg_cost)}</td>
+      <td class="px-3 py-2 text-right">${h.current_price != null ? fmt(h.current_price) : '—'}</td>
+      <td class="px-3 py-2 text-right">${h.currency} ${fmt(h.current_value)}</td>
+      <td class="px-3 py-2 text-right ${colorize(h.realized_pnl)}">${h.currency} ${fmt(h.realized_pnl)}</td>
+      <td class="px-3 py-2 text-right ${colorize(h.unrealized_pnl)}">${h.currency} ${fmt(h.unrealized_pnl)}</td>
+      <td class="px-3 py-2 text-right ${colorize(h.total_pnl)}">${h.currency} ${fmt(h.total_pnl)}</td>
+      <td class="px-3 py-2 text-center text-xs text-gray-500">${esc(h.price_date || '—')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// ─── History render ───────────────────────────────────────────────
+function renderHistory() {
+  const tbody = document.querySelector('#historyTable tbody');
+  const q = (document.getElementById('searchBox').value || '').trim().toLowerCase();
+  tbody.innerHTML = '';
+  const list = trades
+    .filter(t => !q ||
+      String(t.symbol).toLowerCase().includes(q) ||
+      String(t.notes || '').toLowerCase().includes(q) ||
+      String(t.type).toLowerCase().includes(q))
+    .slice()
+    .reverse(); // newest first
+
+  document.getElementById('noTrades').classList.toggle('hidden', list.length > 0);
+
+  for (const t of list) {
+    const tr = document.createElement('tr');
+    tr.className = 'fade-in';
+    const val = (t.volume * t.price).toFixed(2);
+    const ts = t.timestamp.replace('T',' ').replace(/\+.*$/, '');
+    tr.innerHTML = `
+      <td class="px-3 py-2 text-gray-400 text-xs">${esc(ts)}</td>
+      <td class="px-3 py-2">${t.market}</td>
+      <td class="px-3 py-2 font-mono">${esc(t.symbol)}</td>
+      <td class="px-3 py-2 text-center">${t.type === 'BUY' ? '<span class="pill-buy">BUY</span>' : '<span class="pill-sell">SELL</span>'}</td>
+      <td class="px-3 py-2 text-right">${fmt(t.volume, 0)}</td>
+      <td class="px-3 py-2 text-right">${fmt(t.price)}</td>
+      <td class="px-3 py-2 text-right">${t.market === 'HK' ? 'HKD' : 'USD'} ${val}</td>
+      <td class="px-3 py-2 text-xs text-gray-400">${esc(t.notes || '')}</td>
+      <td class="px-3 py-2 text-center"><button data-id="${t.id}" class="text-xs text-red-500 hover:text-red-400 del-btn">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+  // Bind delete buttons
+  tbody.querySelectorAll('.del-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = b.getAttribute('data-id');
+      trades = trades.filter(t => t.id !== id);
+      saveLocal();
+      renderHistory();
+    });
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
+}
+
+// ─── Form submit ──────────────────────────────────────────────────
+document.getElementById('tradeForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const market = document.getElementById('fMarket').value;
+  const symbol = document.getElementById('fSymbol').value.trim().toUpperCase();
+  const type = document.getElementById('fType').value;
+  const volume = parseFloat(document.getElementById('fVolume').value);
+  const price = parseFloat(document.getElementById('fPrice').value);
+  const notes = document.getElementById('fNotes').value.trim();
+  if (!symbol || !(volume > 0) || !(price > 0)) return;
+  const id = (crypto.randomUUID ? crypto.randomUUID() : 't' + Date.now() + Math.random().toString(16).slice(2));
+  const now = new Date();
+  // ISO 8601 with +08:00 offset to match update_pnl.py output
+  const offset = now.getTimezoneOffset() === -480 ? '+08:00' :
+                 (now.getTimezoneOffset() <= -480 ? '+08:00' : 'Z'); // default fine for HK users
+  // Use browser-local ISO with timezone offset
+  const ts = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+  trades.push({ id, timestamp: ts, market, symbol, type, volume, price, notes });
+  saveLocal();
+  renderHistory();
+  e.target.reset();
+  document.getElementById('fMarket').value = market; // keep market
+  document.getElementById('fSymbol').focus();
+});
+
+// ─── Search / filter ──────────────────────────────────────────────
+document.getElementById('searchBox').addEventListener('input', renderHistory);
+
+// ─── Import / Export / Clear ──────────────────────────────────────
+document.getElementById('btnExport').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(trades, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'trades.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+document.getElementById('fileImport').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (Array.isArray(data)) {
+      if (confirm(`Import ${data.length} trade(s)? This replaces your current local list.`)) {
+        trades = data;
+        saveLocal();
+        renderHistory();
+      }
+    } else alert('Invalid trades.json: must be an array.');
+  } catch (err) { alert('Parse error: ' + err.message); }
+  e.target.value = '';
+});
+
+document.getElementById('btnClear').addEventListener('click', () => {
+  if (!confirm('Clear all local trades? This will not change the deployed version.')) return;
+  trades = [];
+  saveLocal();
+  renderHistory();
+});
+
+// ─── Boot ─────────────────────────────────────────────────────────
+loadLocal();
+loadDeployedTrades();
+loadSummary();
+renderHistory();
+</script>
+</body>
+</html>

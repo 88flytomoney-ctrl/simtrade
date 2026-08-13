@@ -1,0 +1,52 @@
+name: Daily PnL Update
+
+on:
+  schedule:
+    # Every weekday after both HK + US market close:
+    # 22:00 HKT (14:00 UTC) Mon–Fri
+    - cron: '0 14 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update-pnl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas yfinance -q
+
+      - name: Run PnL updater
+        run: python3 update_pnl.py
+
+      - name: Commit updated PnL summary
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/pnl_summary.json data/trades.json
+          git diff --staged --quiet && echo "No changes to commit" || \
+            git commit -m "🤖 Auto-update PnL summary $(date -u +%Y-%m-%d\\ %H:%M) UTC" && \
+            git push
+
+      # ── Pages deploy: upload the repo root (index.html + data/*.json) ──
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
