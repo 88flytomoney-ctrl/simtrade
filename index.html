@@ -270,7 +270,7 @@ async function loadSummary() {
 // ─── Fetch the deployed trades.json on load ───────────────────────
 async function loadDeployedTrades() {
   // Only fetch once; if localStorage has trades we keep those.
-  if (trades.length > 0) { renderHistory(); return; }
+  if (trades.length > 0) { renderHistory(); renderDashboard(); return; }
   const candidates = ['./data/trades.json', '/simtrade/data/trades.json'];
   for (const url of candidates) {
     try {
@@ -281,11 +281,13 @@ async function loadDeployedTrades() {
         trades = data;
         saveLocal();
         renderHistory();
+        renderDashboard();   // refresh PnL + holdings live
         return;
       }
     } catch (_) {}
   }
   renderHistory();
+  renderDashboard();   // even with no trades, make sure dashboard renders
 }
 
 // ─── Formatting helpers ───────────────────────────────────────────
@@ -570,9 +572,11 @@ document.getElementById('btnClear').addEventListener('click', () => {
 
 // ─── Boot ─────────────────────────────────────────────────────────
 loadLocal();
-loadDeployedTrades();
-loadSummary();
-renderHistory();
+renderHistory();        // synchronous first paint from localStorage
+loadDeployedTrades();  // async: falls back to deployed trades.json if localStorage empty
+loadSummary();         // async: loads price cache then renders dashboard
+// Both async paths call renderDashboard() when done, so the final dashboard
+// always reflects the eventual trades + price state, regardless of completion order.
 </script>
 </body>
 </html>
