@@ -14,11 +14,13 @@
   @keyframes fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
   .pill-buy { color:#22c55e; background: rgba(34,197,94,.12); padding:1px 10px; border-radius:9999px; font-weight:600; font-size:.8rem; }
   .pill-sell{ color:#ef4444; background: rgba(239,68,68,.12); padding:1px 10px; border-radius:9999px; font-weight:600; font-size:.8rem; }
+  .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.2); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen">
 
-<!-- ===================== AUTH GATE ===================== -->
+<!-- ===================== AUTH GATE (Layer 1: Password) ===================== -->
 <div id="authGate" class="fixed inset-0 z-50 bg-gray-950 flex items-center justify-center">
   <div class="bg-gray-900 rounded-xl border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl">
     <div class="text-center mb-6">
@@ -39,21 +41,57 @@
   </div>
 </div>
 
-<!-- ===================== MAIN CONTENT (hidden until authed) ===================== -->
+<!-- ===================== TOKEN GATE (Layer 2: GitHub PAT) ===================== -->
+<div id="tokenGate" class="fixed inset-0 z-40 bg-gray-950 flex items-center justify-center" style="display:none;">
+  <div class="bg-gray-900 rounded-xl border border-gray-800 p-8 max-w-md w-full mx-4 shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="text-5xl mb-3">🔑</div>
+      <h2 class="text-xl font-bold mb-1">GitHub Token 設定</h2>
+      <p class="text-gray-500 text-sm">需要 Personal Access Token 來讀寫交易數據</p>
+    </div>
+    <form id="tokenForm" class="space-y-4">
+      <input id="tokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required
+             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono focus:border-blue-500 focus:outline-none">
+      <div class="text-xs text-gray-500 space-y-1">
+        <p>📌 在 GitHub 建立 Token: Settings → Developer settings → Personal access tokens → Tokens (classic)</p>
+        <p>✅ 勾選 <code class="text-gray-300">repo</code> 權限即可</p>
+        <p>💾 Token 只儲存在你的瀏覽器 localStorage，不會上傳</p>
+      </div>
+      <button type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-3 text-sm transition">
+        💾 儲存並連接
+      </button>
+    </form>
+    <p id="tokenError" class="text-red-400 text-sm text-center mt-3 hidden"></p>
+    <button id="btnChangeToken" type="button"
+            class="w-full text-gray-500 text-xs text-center mt-3 hover:text-gray-300 hidden">🔄 更換 Token</button>
+  </div>
+</div>
+
+<!-- ===================== MAIN CONTENT (hidden until authed + tokened) ===================== -->
 <div id="appContent" class="max-w-5xl mx-auto px-4 py-8" style="display:none;">
 
   <!-- ===================== HEADER ===================== -->
   <header class="mb-8">
     <div class="flex items-center justify-between">
       <h1 class="text-3xl font-bold">📈 SimTrade <span class="text-gray-500 font-normal text-base align-middle">Simulated Stock Trading</span></h1>
-      <button id="btnLock" type="button"
-              class="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-300 transition">
-        🔒 Lock
-      </button>
+      <div class="flex items-center gap-2">
+        <button id="btnRefresh" type="button" title="從 GitHub 重新載入"
+                class="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 transition">
+          🔄
+        </button>
+        <button id="btnLock" type="button"
+                class="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-300 transition">
+          🔒 Lock
+        </button>
+      </div>
     </div>
     <p class="text-gray-400 text-sm mt-1">記錄模擬買賣 · 自動追蹤持倉與盈虧 (HKD / USD) · 每日 GitHub Actions 更新收盤價</p>
     <p class="text-xs text-gray-500 mt-2">
       <span id="lastUpdated">載入中…</span>
+    </p>
+    <p class="text-xs mt-1">
+      <span id="syncStatus" class="text-gray-600">📡 雲端同步</span>
     </p>
   </header>
 
@@ -139,7 +177,7 @@
 
   <!-- ===================== RECORD TRADE FORM ===================== -->
   <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-3">📝 記錄交易</h2>
+    <h2 class="text-xl font-semibold mb-3">📝 記錄交易 <span class="text-sm text-gray-500 font-normal">→ 自動同步到 GitHub</span></h2>
     <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
       <form id="tradeForm" class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
@@ -185,24 +223,16 @@
 
         <div>
           <label class="block text-xs text-gray-400 mb-1">&nbsp;</label>
-          <button type="submit"
+          <button id="btnSubmitTrade" type="submit"
                   class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-4 py-2 text-sm transition">
             ＋ Add Trade
           </button>
         </div>
       </form>
 
-      <!-- Toolbar: import/export -->
-      <div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-gray-800 text-xs text-gray-400">
-        <span class="self-center">💾 Auto-saved to browser localStorage. </span>
-        <button id="btnExport" type="button" class="bg-gray-800 hover:bg-gray-700 rounded px-3 py-1">⬇ Export trades.json</button>
-        <label class="bg-gray-800 hover:bg-gray-700 rounded px-3 py-1 cursor-pointer">
-          ⬆ Import trades.json
-          <input id="fileImport" type="file" accept=".json" class="hidden">
-        </label>
-        <button id="btnClear" type="button" class="bg-gray-800 hover:bg-red-900 rounded px-3 py-1">🗑 Clear all</button>
-        <span class="self-center ml-auto">To update the live dashboard, commit exported <code class="text-gray-300">data/trades.json</code> and push.</span>
-      </div>
+      <p class="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-800">
+        💡 交易直接寫入 GitHub <code class="text-gray-300">data/trades.json</code>，所有設備同步可見。
+      </p>
     </div>
   </section>
 
@@ -244,16 +274,8 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════
-// 🔐 AUTHENTICATION GATE — SHA-256 password via Web Crypto API
+// 🔐 AUTHENTICATION — Layer 1: Password (SHA-256)
 // ═══════════════════════════════════════════════════════════════════════
-//
-// To generate a new password hash, run any of these:
-//   Python:  python3 -c "import hashlib; print(hashlib.sha256('MyPass'.encode()).hexdigest())"
-//   Node:    node -e "console.log(require('crypto').createHash('sha256').update('MyPass').digest('hex'))"
-//   Bash:    echo -n 'MyPass' | sha256sum | cut -d' ' -f1
-// Then paste the 64-char hex string into PASSWORD_HASH below.
-//
-// Current password hash = SHA-256('Password04')
 const PASSWORD_HASH = '574a14bdbb39813e68cf9de4fc163586cc6491bf34d9ceac7e89378af66c496c';
 const AUTH_TOKEN    = 'simtrade.auth.v1';
 
@@ -263,85 +285,122 @@ async function sha256Hex(text) {
   return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-function showLockScreen() {
-  document.getElementById('authGate').style.display = 'flex';
-  document.getElementById('appContent').style.display = 'none';
-  const pwInput = document.getElementById('authPassword');
-  pwInput.value = '';
-  pwInput.focus();
-  document.getElementById('authError').classList.add('hidden');
-}
+// ═══════════════════════════════════════════════════════════════════════
+// 🔑 GITHUB TOKEN — Layer 2: PAT stored in localStorage
+// ═══════════════════════════════════════════════════════════════════════
+const TOKEN_KEY     = 'simtrade.pat.v1';
+const GITHUB_OWNER  = '88flytomoney-ctrl';
+const GITHUB_REPO   = 'simtrade';
+const GITHUB_BRANCH = 'main';
+const TRADES_PATH   = 'data/trades.json';
 
-function unlockApp() {
-  document.getElementById('authGate').style.display = 'none';
-  document.getElementById('appContent').style.display = 'block';
-}
-
-document.getElementById('authForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const input = document.getElementById('authPassword').value;
-  const hash = await sha256Hex(input);
-  if (hash === PASSWORD_HASH) {
-    sessionStorage.setItem(AUTH_TOKEN, '1');
-    unlockApp();
-    // Trigger initial data load now that the app is visible
-    loadLocal(); renderHistory(); loadDeployedTrades(); loadSummary();
-  } else {
-    document.getElementById('authError').classList.remove('hidden');
-    document.getElementById('authPassword').select();
-  }
-});
-
-document.getElementById('btnLock').addEventListener('click', () => {
-  sessionStorage.removeItem(AUTH_TOKEN);
-  showLockScreen();
-});
-
-// ── Alert if Web Crypto not available (non-HTTPS context) ──────────
-if (!window.crypto || !window.crypto.subtle) {
-  document.getElementById('authForm').addEventListener('submit', function cryptoFallback(e) {
-    e.preventDefault();
-    alert('⚠️ Web Crypto API 需要 HTTPS 環境。請以 https:// 開啟本頁面，或在 localhost 測試。');
-  }, true);
-}
-
-// ── Boot: check if already authenticated this session ───────────────
-function authBoot() {
-  if (sessionStorage.getItem(AUTH_TOKEN) === '1') {
-    unlockApp();
-    return true;
-  }
-  showLockScreen();
-  return false;
-}
-const _isAuthed = authBoot();
+function getToken()       { return localStorage.getItem(TOKEN_KEY) || ''; }
+function setToken(t)      { localStorage.setItem(TOKEN_KEY, t); }
+function removeToken()    { localStorage.removeItem(TOKEN_KEY); }
+function hasToken()       { return getToken().length > 0; }
 
 // ═══════════════════════════════════════════════════════════════════════
-// APP STATE & LOGIC
+// GitHub Contents API — read & write trades.json
 // ═══════════════════════════════════════════════════════════════════════
-// ─── State ────────────────────────────────────────────────────────
-const STORE_KEY = 'simtrade.trades.v1';
+
+// Read trades.json from GitHub — returns {trades: [...], sha: "..."}
+async function ghReadTrades() {
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${TRADES_PATH}?ref=${GITHUB_BRANCH}`;
+  const r = await fetch(url, {
+    headers: { Authorization: `token ${getToken()}`, Accept: 'application/vnd.github.v3+json' },
+  });
+  if (r.status === 404) return { trades: [], sha: null };
+  if (!r.ok) throw new Error(`GitHub API ${r.status}: ${await r.text()}`);
+  const data = await r.json();
+  const content = JSON.parse(atob(data.content.replace(/\n/g, '')));
+  return { trades: Array.isArray(content) ? content : [], sha: data.sha };
+}
+
+// Write trades.json to GitHub — returns the new sha
+async function ghWriteTrades(trades, sha) {
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${TRADES_PATH}`;
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(trades, null, 2))));
+  const body = {
+    message: `Update trades via SimTrade web — ${new Date().toISOString().slice(0,19)}`,
+    content,
+    branch: GITHUB_BRANCH,
+  };
+  if (sha) body.sha = sha;  // required for update (not create)
+  const r = await fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: `token ${getToken()}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`GitHub API ${r.status}: ${await r.text()}`);
+  const data = await r.json();
+  return data.content.sha;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════════════════════
 let trades = [];
+let tradesSha = null;    // GitHub blob SHA for trades.json (needed for updates)
 let summary = null;
-// priceCache: last-known prices from the deployed pnl_summary.json
-// {"HK:00700": {price: 442.20, date: "2026-08-13"}, ...}
 let priceCache = {};
+let isSyncing = false;
 
-// ─── Persistence ──────────────────────────────────────────────────
-function loadLocal() {
+// ═══════════════════════════════════════════════════════════════════════
+// SYNC — load trades from GitHub (replaces localStorage)
+// ═══════════════════════════════════════════════════════════════════════
+function setSyncStatus(text, colorClass) {
+  const el = document.getElementById('syncStatus');
+  el.textContent = text;
+  el.className = colorClass || 'text-gray-600';
+}
+
+async function syncFromGitHub() {
+  if (isSyncing) return;
+  isSyncing = true;
+  setSyncStatus('⏳ 正在從 GitHub 載入…', 'text-yellow-400');
+  document.getElementById('btnRefresh').disabled = true;
   try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) trades = JSON.parse(raw);
-  } catch (_) { trades = []; }
-}
-function saveLocal() {
-  localStorage.setItem(STORE_KEY, JSON.stringify(trades, null, 2));
+    const { trades: remote, sha } = await ghReadTrades();
+    trades = remote;
+    tradesSha = sha;
+    renderHistory();
+    renderDashboard();
+    setSyncStatus(`✅ 已同步 — ${trades.length} 筆交易 (GitHub)`, 'text-green-400');
+  } catch (err) {
+    setSyncStatus(`❌ 載入失敗: ${err.message}`, 'text-red-400');
+    console.error(err);
+  } finally {
+    isSyncing = false;
+    document.getElementById('btnRefresh').disabled = false;
+  }
 }
 
-// ─── Fetch the deployed PnL summary on load ───────────────────────
+// Push updated trades array to GitHub
+async function pushToGitHub(newTrades, action) {
+  setSyncStatus(`⏳ 正在${action}…`, 'text-yellow-400');
+  try {
+    tradesSha = await ghWriteTrades(newTrades, tradesSha);
+    trades = newTrades;
+    renderHistory();
+    renderDashboard();
+    setSyncStatus(`✅ 已同步到 GitHub — ${trades.length} 筆交易`, 'text-green-400');
+    return true;
+  } catch (err) {
+    setSyncStatus(`❌ 同步失敗: ${err.message}`, 'text-red-400');
+    console.error(err);
+    // Try re-syncing in case of SHA mismatch
+    if (err.message.includes('409') || err.message.includes('422')) {
+      setSyncStatus('⚠️ 衝突 detected — 重新載入中…', 'text-yellow-400');
+      await syncFromGitHub();
+    }
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FETCH PnL SUMMARY (price cache)
+// ═══════════════════════════════════════════════════════════════════════
 async function loadSummary() {
-  // GitHub Pages serves /simtrade/data/pnl_summary.json under the repo.
-  // For local dev it's ./data/pnl_summary.json.
   const candidates = [
     './data/pnl_summary.json',
     '/simtrade/data/pnl_summary.json',
@@ -351,7 +410,6 @@ async function loadSummary() {
       const r = await fetch(url, { cache: 'no-store' });
       if (!r.ok) continue;
       summary = await r.json();
-      // Cache the last-known prices so the local PnL engine can use them
       if (summary.holdings) {
         for (const [key, h] of Object.entries(summary.holdings)) {
           if (h.current_price != null) {
@@ -363,38 +421,17 @@ async function loadSummary() {
         summary.last_updated
           ? `最後更新 (prices): ${summary.last_updated.replace('T',' ').replace(/\+.*$/,' HKT')}`
           : '';
-      renderDashboard();   // compute + render from current local trades
+      renderDashboard();
       return;
     } catch (_) {}
   }
-  // Fallbacks failed — local-only mode (no price cache)
-  document.getElementById('lastUpdated').textContent = '⚠️ 未載入 pnl_summary.json（純本地模式，無即時報價）';
-  renderDashboard();       // still render with no prices
-}
-// ─── Fetch the deployed trades.json on load ───────────────────────
-async function loadDeployedTrades() {
-  // Only fetch once; if localStorage has trades we keep those.
-  if (trades.length > 0) { renderHistory(); renderDashboard(); return; }
-  const candidates = ['./data/trades.json', '/simtrade/data/trades.json'];
-  for (const url of candidates) {
-    try {
-      const r = await fetch(url, { cache: 'no-store' });
-      if (!r.ok) continue;
-      const data = await r.json();
-      if (Array.isArray(data) && data.length > 0) {
-        trades = data;
-        saveLocal();
-        renderHistory();
-        renderDashboard();   // refresh PnL + holdings live
-        return;
-      }
-    } catch (_) {}
-  }
-  renderHistory();
-  renderDashboard();   // even with no trades, make sure dashboard renders
+  document.getElementById('lastUpdated').textContent = '⚠️ 未載入 pnl_summary.json';
+  renderDashboard();
 }
 
-// ─── Formatting helpers ───────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// FORMATTING HELPERS
+// ═══════════════════════════════════════════════════════════════════════
 function fmt(n, dp = 2) {
   if (n == null || isNaN(n)) return '—';
   return Number(n).toLocaleString('en-HK', { minimumFractionDigits: dp, maximumFractionDigits: dp });
@@ -405,10 +442,14 @@ function colorize(n) {
   if (n < 0) return 'text-red-400';
   return 'text-gray-300';
 }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
+}
 
-// ─── Client-side FIFO PnL engine (mirrors update_pnl.py compute_pnl) ──
+// ═══════════════════════════════════════════════════════════════════════
+// CLIENT-SIDE FIFO PnL ENGINE (mirrors update_pnl.py)
+// ═══════════════════════════════════════════════════════════════════════
 function computeLocalPnL() {
-  // Group trades by (market, symbol), sort by timestamp
   const perSymbol = {};
   for (const t of trades) {
     const key = `${t.market}:${t.symbol}`;
@@ -423,17 +464,13 @@ function computeLocalPnL() {
     us_total_invested: 0, us_current_value: 0, us_realized_pnl: 0, us_unrealized_pnl: 0,
   };
 
-  // Collect symbols that have no price yet — for a warning line
-  const missingPrices = [];
-
   for (const [key, symTrades] of Object.entries(perSymbol)) {
     const market = symTrades[0].market.toUpperCase();
     const symbol = symTrades[0].symbol;
     const currency = market === 'HK' ? 'HKD' : 'USD';
     const bucket = market === 'HK' ? 'hk' : 'us';
 
-    // FIFO accounting
-    let buyPool = [];     // [[volRemaining, price], ...]
+    let buyPool = [];
     let realized = 0;
     let totalBoughtCost = 0;
 
@@ -444,7 +481,7 @@ function computeLocalPnL() {
       if (ttype === 'BUY') {
         buyPool.push([vol, price]);
         totalBoughtCost += vol * price;
-      } else {  // SELL — drain FIFO
+      } else {
         let sellVol = vol;
         let costBasis = 0;
         while (sellVol > 0 && buyPool.length > 0) {
@@ -455,22 +492,16 @@ function computeLocalPnL() {
           lotVol - take <= 0 ? buyPool.shift() : (buyPool[0][0] = lotVol - take);
         }
         realized += (vol - sellVol) * price - costBasis;
-        if (sellVol > 0) realized += sellVol * price;  // short stub
+        if (sellVol > 0) realized += sellVol * price;
       }
     }
 
-    // Current holding
     const holdingVolume = buyPool.reduce((s,lot)=>s+lot[0], 0);
     const avgCost = holdingVolume > 0
       ? buyPool.reduce((s,lot)=>s+lot[0]*lot[1],0) / holdingVolume : 0;
-
-    // Pull live price from the cache populated by loadSummary
     const cached = priceCache[key];
     const curPrice = cached ? cached.price : null;
     const priceDate = cached ? cached.date : null;
-
-    if (cached == null && holdingVolume > 0) missingPrices.push(key);
-
     const currentValue = (curPrice != null && holdingVolume > 0) ? holdingVolume * curPrice : 0;
     const unrealized = (curPrice != null && holdingVolume > 0) ? currentValue - holdingVolume * avgCost : 0;
 
@@ -494,14 +525,13 @@ function computeLocalPnL() {
   }
   for (const k of Object.keys(totals)) totals[k] = Math.round(totals[k] * 100) / 100;
 
-  // Augment cached prices with any NEW symbol currently absent from priceCache,
-  // so the user sees the holding even without a live close yet (price=null)
-  return { holdings, ...totals, _missingPrices: missingPrices };
+  return { holdings, ...totals };
 }
 
-// ─── Dashboard render ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// RENDER — Dashboard
+// ═══════════════════════════════════════════════════════════════════════
 function renderDashboard() {
-  // Recompute from current local trades every time
   const local = computeLocalPnL();
 
   setText('hkInvested',   fmt(local.hk_total_invested));
@@ -525,7 +555,7 @@ function setText(id, val, color=false) {
   el.textContent = val;
   if (color) el.className = 'num ' + (
     /^\-/.test(val) ? 'text-red-400' :
-    /^0(\.0+)?$/.test(val) ? 'text-gray-300' :
+    /^0(\\.0+)?$/.test(val) ? 'text-gray-300' :
     'text-green-400'
   );
 }
@@ -561,7 +591,9 @@ function renderHoldings(holdings) {
   }
 }
 
-// ─── History render ───────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// RENDER — Trade History (with delete → pushToGitHub)
+// ═══════════════════════════════════════════════════════════════════════
 function renderHistory() {
   const tbody = document.querySelector('#historyTable tbody');
   const q = (document.getElementById('searchBox').value || '').trim().toLowerCase();
@@ -572,7 +604,7 @@ function renderHistory() {
       String(t.notes || '').toLowerCase().includes(q) ||
       String(t.type).toLowerCase().includes(q))
     .slice()
-    .reverse(); // newest first
+    .reverse();
 
   document.getElementById('noTrades').classList.toggle('hidden', list.length > 0);
 
@@ -594,24 +626,23 @@ function renderHistory() {
     `;
     tbody.appendChild(tr);
   }
-  // Bind delete buttons
+  // Bind delete buttons — each delete pushes entire array to GitHub
   tbody.querySelectorAll('.del-btn').forEach(b => {
-    b.addEventListener('click', () => {
+    b.addEventListener('click', async () => {
       const id = b.getAttribute('data-id');
-      trades = trades.filter(t => t.id !== id);
-      saveLocal();
-      renderHistory();
-      renderDashboard();   // refresh PnL + holdings live
+      const t = trades.find(x => x.id === id);
+      const sym = t ? `${t.market}:${t.symbol}` : id;
+      if (!confirm(`刪除交易 ${sym}？\n此操作會直接更新 GitHub 上的 trades.json。`)) return;
+      const newTrades = trades.filter(x => x.id !== id);
+      await pushToGitHub(newTrades, '刪除交易');
     });
   });
 }
 
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
-}
-
-// ─── Form submit ──────────────────────────────────────────────────
-document.getElementById('tradeForm').addEventListener('submit', e => {
+// ═══════════════════════════════════════════════════════════════════════
+// FORM — Add trade → pushToGitHub
+// ═══════════════════════════════════════════════════════════════════════
+document.getElementById('tradeForm').addEventListener('submit', async e => {
   e.preventDefault();
   const market = document.getElementById('fMarket').value;
   const symbol = document.getElementById('fSymbol').value.trim().toUpperCase();
@@ -620,71 +651,129 @@ document.getElementById('tradeForm').addEventListener('submit', e => {
   const price = parseFloat(document.getElementById('fPrice').value);
   const notes = document.getElementById('fNotes').value.trim();
   if (!symbol || !(volume > 0) || !(price > 0)) return;
+
   const id = (crypto.randomUUID ? crypto.randomUUID() : 't' + Date.now() + Math.random().toString(16).slice(2));
-  const now = new Date();
-  // ISO 8601 with +08:00 offset to match update_pnl.py output
-  const offset = now.getTimezoneOffset() === -480 ? '+08:00' :
-                 (now.getTimezoneOffset() <= -480 ? '+08:00' : 'Z'); // default fine for HK users
-  // Use browser-local ISO with timezone offset
-  const ts = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
-  trades.push({ id, timestamp: ts, market, symbol, type, volume, price, notes });
-  saveLocal();
-  renderHistory();
-  renderDashboard();   // refresh PnL + holdings live
-  e.target.reset();
-  document.getElementById('fMarket').value = market; // keep market
-  document.getElementById('fSymbol').focus();
+  const ts = new Date().toISOString();
+  const newTrade = { id, timestamp: ts, market, symbol, type, volume, price, notes };
+
+  const newTrades = [...trades, newTrade];
+
+  // Disable form while syncing
+  const btn = document.getElementById('btnSubmitTrade');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 同步中…';
+
+  const ok = await pushToGitHub(newTrades, '新增交易');
+
+  btn.disabled = false;
+  btn.textContent = origText;
+
+  if (ok) {
+    e.target.reset();
+    document.getElementById('fMarket').value = market;
+    document.getElementById('fSymbol').focus();
+  }
 });
 
 // ─── Search / filter ──────────────────────────────────────────────
 document.getElementById('searchBox').addEventListener('input', renderHistory);
 
-// ─── Import / Export / Clear ──────────────────────────────────────
-document.getElementById('btnExport').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(trades, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'trades.json';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-});
+// ─── Refresh button ──────────────────────────────────────────────
+document.getElementById('btnRefresh').addEventListener('click', syncFromGitHub);
 
-document.getElementById('fileImport').addEventListener('change', async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const data = JSON.parse(await file.text());
-    if (Array.isArray(data)) {
-      if (confirm(`Import ${data.length} trade(s)? This replaces your current local list.`)) {
-        trades = data;
-        saveLocal();
-        renderHistory();
-        renderDashboard();   // refresh PnL + holdings live
-      }
-    } else alert('Invalid trades.json: must be an array.');
-  } catch (err) { alert('Parse error: ' + err.message); }
-  e.target.value = '';
-});
-
-document.getElementById('btnClear').addEventListener('click', () => {
-  if (!confirm('Clear all local trades? This will not change the deployed version.')) return;
-  trades = [];
-  saveLocal();
-  renderHistory();
-  renderDashboard();   // refresh PnL + holdings live
-});
-
-// ─── Boot ─────────────────────────────────────────────────────────
-// Only auto-load data if already authed. Otherwise the auth form's
-// submit handler triggers the same load sequence after unlock.
-if (_isAuthed) {
-  loadLocal();
-  renderHistory();        // synchronous first paint from localStorage
-  loadDeployedTrades();  // async: falls back to deployed trades.json if localStorage empty
-  loadSummary();         // async: loads price cache then renders dashboard
+// ═══════════════════════════════════════════════════════════════════════
+// AUTH FLOW — Two layers
+// ═══════════════════════════════════════════════════════════════════════
+function showLockScreen() {
+  document.getElementById('authGate').style.display = 'flex';
+  document.getElementById('tokenGate').style.display = 'none';
+  document.getElementById('appContent').style.display = 'none';
+  const pwInput = document.getElementById('authPassword');
+  pwInput.value = '';
+  pwInput.focus();
+  document.getElementById('authError').classList.add('hidden');
 }
-// Both async paths call renderDashboard() when done, so the final dashboard
-// always reflects the eventual trades + price state, regardless of completion order.
+
+function showTokenScreen(firstTime) {
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('tokenGate').style.display = 'flex';
+  document.getElementById('appContent').style.display = 'none';
+  const ti = document.getElementById('tokenInput');
+  ti.value = firstTime ? '' : getToken();
+  ti.focus();
+  document.getElementById('tokenError').classList.add('hidden');
+  document.getElementById('btnChangeToken').classList.toggle('hidden', firstTime);
+}
+
+function showApp() {
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('tokenGate').style.display = 'none';
+  document.getElementById('appContent').style.display = 'block';
+  // Load data from GitHub
+  syncFromGitHub();
+  loadSummary();
+}
+
+// Layer 1: Password
+document.getElementById('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('authPassword').value;
+  const hash = await sha256Hex(input);
+  if (hash === PASSWORD_HASH) {
+    sessionStorage.setItem(AUTH_TOKEN, '1');
+    // Check if token exists — if so go straight to app, otherwise show token screen
+    if (hasToken()) {
+      showApp();
+    } else {
+      showTokenScreen(true);
+    }
+  } else {
+    document.getElementById('authError').classList.remove('hidden');
+    document.getElementById('authPassword').select();
+  }
+});
+
+// Layer 2: Token
+document.getElementById('tokenForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const token = document.getElementById('tokenInput').value.trim();
+  if (!token) return;
+  setToken(token);
+  // Verify the token works by trying to read trades.json
+  document.getElementById('tokenError').classList.add('hidden');
+  try {
+    await ghReadTrades();
+    showApp();
+  } catch (err) {
+    document.getElementById('tokenError').textContent = `❌ Token 驗證失敗: ${err.message}`;
+    document.getElementById('tokenError').classList.remove('hidden');
+    removeToken();
+  }
+});
+
+document.getElementById('btnChangeToken').addEventListener('click', () => {
+  removeToken();
+  showTokenScreen(true);
+});
+
+// Lock button (in app header)
+document.getElementById('btnLock').addEventListener('click', () => {
+  sessionStorage.removeItem(AUTH_TOKEN);
+  showLockScreen();
+});
+
+// ── Boot ─────────────────────────────────────────────────────────
+if (sessionStorage.getItem(AUTH_TOKEN) === '1') {
+  // Already authed this session
+  if (hasToken()) {
+    showApp();
+  } else {
+    showTokenScreen(true);
+  }
+} else {
+  showLockScreen();
+}
 </script>
 </body>
 </html>
