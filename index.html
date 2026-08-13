@@ -219,6 +219,9 @@
 const STORE_KEY = 'simtrade.trades.v1';
 let trades = [];
 let summary = null;
+// priceCache: last-known prices from the deployed pnl_summary.json
+// {"HK:00700": {price: 442.20, date: "2026-08-13"}, ...}
+let priceCache = {};
 
 // ─── Persistence ──────────────────────────────────────────────────
 function loadLocal() {
@@ -244,12 +247,25 @@ async function loadSummary() {
       const r = await fetch(url, { cache: 'no-store' });
       if (!r.ok) continue;
       summary = await r.json();
-      renderDashboard();
+      // Cache the last-known prices so the local PnL engine can use them
+      if (summary.holdings) {
+        for (const [key, h] of Object.entries(summary.holdings)) {
+          if (h.current_price != null) {
+            priceCache[key] = { price: h.current_price, date: h.price_date, currency: h.currency };
+          }
+        }
+      }
+      document.getElementById('lastUpdated').textContent =
+        summary.last_updated
+          ? `最後更新 (prices): ${summary.last_updated.replace('T',' ').replace(/\+.*$/,' HKT')}`
+          : '';
+      renderDashboard();   // compute + render from current local trades
       return;
     } catch (_) {}
   }
-  // Fallbacks failed — local-only mode
-  document.getElementById('lastUpdated').textContent = '⚠️ 未載入 pnl_summary.json（純本地模式）';
+  // Fallbacks failed — local-only mode (no price cache)
+  document.getElementById('lastUpdated').textContent = '⚠️ 未載入 pnl_summary.json（純本地模式，無即時報價）';
+  renderDashboard();       // still render with no prices
 }
 // ─── Fetch the deployed trades.json on load ───────────────────────
 async function loadDeployedTrades() {
@@ -284,28 +300,119 @@ function colorize(n) {
   return 'text-gray-300';
 }
 
+// ─── Client-side FIFO PnL engine (mirrors update_pnl.py compute_pnl) ──
+function computeLocalPnL() {
+  // Group trades by (market, symbol), sort by timestamp
+  const perSymbol = {};
+  for (const t of trades) {
+    const key = `${t.market}:${t.symbol}`;
+    if (!perSymbol[key]) perSymbol[key] = [];
+    perSymbol[key].push(t);
+  }
+  for (const k of Object.keys(perSymbol)) perSymbol[k].sort((a,b)=>a.timestamp.localeCompare(b.timestamp));
+
+  const holdings = {};
+  const totals = {
+    hk_total_invested: 0, hk_current_value: 0, hk_realized_pnl: 0, hk_unrealized_pnl: 0,
+    us_total_invested: 0, us_current_value: 0, us_realized_pnl: 0, us_unrealized_pnl: 0,
+  };
+
+  // Collect symbols that have no price yet — for a warning line
+  const missingPrices = [];
+
+  for (const [key, symTrades] of Object.entries(perSymbol)) {
+    const market = symTrades[0].market.toUpperCase();
+    const symbol = symTrades[0].symbol;
+    const currency = market === 'HK' ? 'HKD' : 'USD';
+    const bucket = market === 'HK' ? 'hk' : 'us';
+
+    // FIFO accounting
+    let buyPool = [];     // [[volRemaining, price], ...]
+    let realized = 0;
+    let totalBoughtCost = 0;
+
+    for (const t of symTrades) {
+      const ttype = t.type.toUpperCase();
+      const vol = parseFloat(t.volume);
+      const price = parseFloat(t.price);
+      if (ttype === 'BUY') {
+        buyPool.push([vol, price]);
+        totalBoughtCost += vol * price;
+      } else {  // SELL — drain FIFO
+        let sellVol = vol;
+        let costBasis = 0;
+        while (sellVol > 0 && buyPool.length > 0) {
+          const [lotVol, lotPrice] = buyPool[0];
+          const take = Math.min(sellVol, lotVol);
+          costBasis += take * lotPrice;
+          sellVol -= take;
+          lotVol - take <= 0 ? buyPool.shift() : (buyPool[0][0] = lotVol - take);
+        }
+        realized += (vol - sellVol) * price - costBasis;
+        if (sellVol > 0) realized += sellVol * price;  // short stub
+      }
+    }
+
+    // Current holding
+    const holdingVolume = buyPool.reduce((s,lot)=>s+lot[0], 0);
+    const avgCost = holdingVolume > 0
+      ? buyPool.reduce((s,lot)=>s+lot[0]*lot[1],0) / holdingVolume : 0;
+
+    // Pull live price from the cache populated by loadSummary
+    const cached = priceCache[key];
+    const curPrice = cached ? cached.price : null;
+    const priceDate = cached ? cached.date : null;
+
+    if (cached == null && holdingVolume > 0) missingPrices.push(key);
+
+    const currentValue = (curPrice != null && holdingVolume > 0) ? holdingVolume * curPrice : 0;
+    const unrealized = (curPrice != null && holdingVolume > 0) ? currentValue - holdingVolume * avgCost : 0;
+
+    holdings[key] = {
+      market, symbol, currency,
+      holding_volume: holdingVolume,
+      avg_cost: Math.round(avgCost * 10000) / 10000,
+      current_price: curPrice,
+      price_date: priceDate,
+      current_value: Math.round(currentValue * 100) / 100,
+      total_bought_cost: Math.round(totalBoughtCost * 100) / 100,
+      realized_pnl: Math.round(realized * 100) / 100,
+      unrealized_pnl: Math.round(unrealized * 100) / 100,
+      total_pnl: Math.round((realized + unrealized) * 100) / 100,
+    };
+
+    totals[`${bucket}_total_invested`] += totalBoughtCost;
+    totals[`${bucket}_current_value`]  += currentValue;
+    totals[`${bucket}_realized_pnl`]   += realized;
+    totals[`${bucket}_unrealized_pnl`] += unrealized;
+  }
+  for (const k of Object.keys(totals)) totals[k] = Math.round(totals[k] * 100) / 100;
+
+  // Augment cached prices with any NEW symbol currently absent from priceCache,
+  // so the user sees the holding even without a live close yet (price=null)
+  return { holdings, ...totals, _missingPrices: missingPrices };
+}
+
 // ─── Dashboard render ─────────────────────────────────────────────
 function renderDashboard() {
-  if (!summary) return;
-  const lu = summary.last_updated;
-  document.getElementById('lastUpdated').textContent =
-    lu ? `最後更新 (prices): ${lu.replace('T',' ').replace(/\+.*$/,' HKT')}` : '';
+  // Recompute from current local trades every time
+  const local = computeLocalPnL();
 
-  setText('hkInvested',  fmt(summary.hk_total_invested));
-  setText('hkMktValue',  fmt(summary.hk_current_value));
-  setText('hkRealized',  fmt(summary.hk_realized_pnl), true);
-  setText('hkUnrealized',fmt(summary.hk_unrealized_pnl), true);
-  setText('hkTotal',     fmt(summary.hk_realized_pnl + summary.hk_unrealized_pnl), true);
-  setText('hkPct',       pct(summary.hk_total_invested, summary.hk_realized_pnl + summary.hk_unrealized_pnl));
+  setText('hkInvested',   fmt(local.hk_total_invested));
+  setText('hkMktValue',   fmt(local.hk_current_value));
+  setText('hkRealized',   fmt(local.hk_realized_pnl), true);
+  setText('hkUnrealized', fmt(local.hk_unrealized_pnl), true);
+  setText('hkTotal',      fmt(local.hk_realized_pnl + local.hk_unrealized_pnl), true);
+  setText('hkPct',        pct(local.hk_total_invested, local.hk_realized_pnl + local.hk_unrealized_pnl));
 
-  setText('usInvested',  fmt(summary.us_total_invested));
-  setText('usMktValue',  fmt(summary.us_current_value));
-  setText('usRealized',  fmt(summary.us_realized_pnl), true);
-  setText('usUnrealized',fmt(summary.us_unrealized_pnl), true);
-  setText('usTotal',     fmt(summary.us_realized_pnl + summary.us_unrealized_pnl), true);
-  setText('usPct',       pct(summary.us_total_invested, summary.us_realized_pnl + summary.us_unrealized_pnl));
+  setText('usInvested',   fmt(local.us_total_invested));
+  setText('usMktValue',   fmt(local.us_current_value));
+  setText('usRealized',   fmt(local.us_realized_pnl), true);
+  setText('usUnrealized', fmt(local.us_unrealized_pnl), true);
+  setText('usTotal',      fmt(local.us_realized_pnl + local.us_unrealized_pnl), true);
+  setText('usPct',        pct(local.us_total_invested, local.us_realized_pnl + local.us_unrealized_pnl));
 
-  renderHoldings();
+  renderHoldings(local.holdings);
 }
 function setText(id, val, color=false) {
   const el = document.getElementById(id);
@@ -321,10 +428,10 @@ function pct(invested, pnl) {
   return (pnl / invested * 100).toFixed(2) + '%';
 }
 
-function renderHoldings() {
+function renderHoldings(holdings) {
+  holdings = holdings || {};
   const tbody = document.querySelector('#holdingsTable tbody');
   tbody.innerHTML = '';
-  const holdings = summary?.holdings || {};
   const keys = Object.keys(holdings);
   document.getElementById('noHoldings').classList.toggle('hidden', keys.length > 0);
 
@@ -388,6 +495,7 @@ function renderHistory() {
       trades = trades.filter(t => t.id !== id);
       saveLocal();
       renderHistory();
+      renderDashboard();   // refresh PnL + holdings live
     });
   });
 }
@@ -416,6 +524,7 @@ document.getElementById('tradeForm').addEventListener('submit', e => {
   trades.push({ id, timestamp: ts, market, symbol, type, volume, price, notes });
   saveLocal();
   renderHistory();
+  renderDashboard();   // refresh PnL + holdings live
   e.target.reset();
   document.getElementById('fMarket').value = market; // keep market
   document.getElementById('fSymbol').focus();
@@ -444,6 +553,7 @@ document.getElementById('fileImport').addEventListener('change', async e => {
         trades = data;
         saveLocal();
         renderHistory();
+        renderDashboard();   // refresh PnL + holdings live
       }
     } else alert('Invalid trades.json: must be an array.');
   } catch (err) { alert('Parse error: ' + err.message); }
@@ -455,6 +565,7 @@ document.getElementById('btnClear').addEventListener('click', () => {
   trades = [];
   saveLocal();
   renderHistory();
+  renderDashboard();   // refresh PnL + holdings live
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────
