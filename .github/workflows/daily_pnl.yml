@@ -2,9 +2,9 @@ name: Daily PnL Update
 
 on:
   schedule:
-    # Every weekday after both HK + US market close:
-    # 22:00 HKT (14:00 UTC) Mon–Fri
-    - cron: '0 14 * * 1-5'
+    # Daily at 08:00 HKT (00:00 UTC) and 17:00 HKT (09:00 UTC)
+    - cron: '0 0 * * *'
+    - cron: '0 9 * * *'
   workflow_dispatch:
 
 permissions:
