@@ -1,12 +1,1 @@
-[
-  {
-    "id": "t1",
-    "timestamp": "2026-08-13T08:00:18Z",
-    "market": "HK",
-    "symbol": "00700",
-    "type": "BUY",
-    "volume": 100,
-    "price": 442,
-    "notes": "initial HK trade"
-  }
-]
+[]
