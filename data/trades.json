@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "1f1482b3-a18a-419e-b6e8-acc60b4628a6",
+    "timestamp": "2026-08-14T06:21:03.367Z",
+    "market": "HK",
+    "symbol": "06869",
+    "type": "BUY",
+    "volume": 100,
+    "price": 131,
+    "notes": ""
+  }
+]
