@@ -123,22 +123,34 @@
     </div>
 
     <!-- USD Card -->
+    <!-- FX rate: edit USD_TO_HKD const in <script> to recalibrate -->
     <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-semibold">🇺🇸 美國股票 <span class="text-xs text-gray-500">(USD)</span></h2>
+        <span id="usFxBadge" class="text-xs text-gray-500">≈ HKD @ 7.80</span>
       </div>
       <div class="space-y-2 text-sm">
-        <div class="flex justify-between"><span class="text-gray-400">投入資本</span><span class="num" id="usInvested">0</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">持倉市值</span><span class="num" id="usMktValue">0</span></div>
-        <div class="flex justify-between border-t border-gray-800 pt-2 mt-1">
-          <span class="text-gray-400">已實現盈虧</span><span class="num" id="usRealized">0</span>
+        <div class="flex justify-between"><span class="text-gray-400">投入資本</span>
+          <span class="text-right"><span class="num" id="usInvested">0</span>
+            <span class="block text-xs text-gray-500 num">(HKD <span id="usInvestedHkd">0</span>)</span></span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-gray-400">未實現盈虧</span><span class="num" id="usUnrealized">0</span>
+        <div class="flex justify-between"><span class="text-gray-400">持倉市值</span>
+          <span class="text-right"><span class="num" id="usMktValue">0</span>
+            <span class="block text-xs text-gray-500 num">(HKD <span id="usMktValueHkd">0</span>)</span></span>
+        </div>
+        <div class="flex justify-between border-t border-gray-800 pt-2 mt-1">
+          <span class="text-gray-400">已實現盈虧</span>
+          <span class="text-right"><span class="num" id="usRealized">0</span>
+            <span class="block text-xs num" id="usRealizedHkdWrap">(HKD <span id="usRealizedHkd">0</span>)</span></span>
+        </div>
+        <div class="flex justify-between"><span class="text-gray-400">未實現盈虧</span>
+          <span class="text-right"><span class="num" id="usUnrealized">0</span>
+            <span class="block text-xs num" id="usUnrealizedHkdWrap">(HKD <span id="usUnrealizedHkd">0</span>)</span></span>
         </div>
         <div class="flex justify-between font-semibold border-t border-gray-800 pt-2 mt-1">
           <span>總盈虧</span>
-          <span class="num" id="usTotal">0</span>
+          <span class="text-right"><span class="num" id="usTotal">0</span>
+            <span class="block text-xs num" id="usTotalHkdWrap">(HKD <span id="usTotalHkd">0</span>)</span></span>
         </div>
         <div class="flex justify-between text-xs">
           <span class="text-gray-500">總回報率</span>
@@ -273,6 +285,15 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════
+// FX — USD → HKD conversion (easily configurable)
+// ═══════════════════════════════════════════════════════════════════════
+const USD_TO_HKD = 7.80;   // fixed USD→HKD rate; change here to recalibrate
+function toHKD(usd) {
+  if (usd == null || isNaN(usd)) return null;
+  return usd * USD_TO_HKD;
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // 🔐 AUTHENTICATION — Layer 1: Password (SHA-256)
 // ═══════════════════════════════════════════════════════════════════════
@@ -548,7 +569,31 @@ function renderDashboard() {
   setText('usTotal',      fmt(local.us_realized_pnl + local.us_unrealized_pnl), true);
   setText('usPct',        pct(local.us_total_invested, local.us_realized_pnl + local.us_unrealized_pnl));
 
+  // ── US → HKD equivalents on the summary card ──
+  document.getElementById('usFxBadge').textContent = `≈ HKD @ ${USD_TO_HKD.toFixed(2)}`;
+  document.getElementById('usInvestedHkd').textContent  = fmt(toHKD(local.us_total_invested));
+  document.getElementById('usMktValueHkd').textContent  = fmt(toHKD(local.us_current_value));
+  document.getElementById('usRealizedHkd').textContent   = fmt(toHKD(local.us_realized_pnl));
+  document.getElementById('usUnrealizedHkd').textContent = fmt(toHKD(local.us_unrealized_pnl));
+  document.getElementById('usTotalHkd').textContent      = fmt(toHKD(local.us_realized_pnl + local.us_unrealized_pnl));
+  // Colour the HKD PnL sub-lines green/red to match the USD line above
+  colorizeSub('usRealizedHkdWrap',   local.us_realized_pnl);
+  colorizeSub('usUnrealizedHkdWrap', local.us_unrealized_pnl);
+  colorizeSub('usTotalHkdWrap',      local.us_realized_pnl + local.us_unrealized_pnl);
+
   renderHoldings(local.holdings);
+}
+
+// Apply green/red/neutral colour to a HKD sub-line wrapper (helper)
+function colorizeSub(id, n) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'block text-xs num ' + (
+    n == null || isNaN(n) ? 'text-gray-500' :
+    n > 0 ? 'text-green-400' :
+    n < 0 ? 'text-red-400' :
+    'text-gray-500'
+  );
 }
 function setText(id, val, color=false) {
   const el = document.getElementById(id);
@@ -573,6 +618,18 @@ function renderHoldings(holdings) {
 
   for (const k of keys) {
     const h = holdings[k];
+    const isUS = String(h.market).toUpperCase() === 'US';
+    // For US rows, show USD value plus HKD equivalent subtext.
+    // HK rows render as before (no subtext).
+    const mktCell   = isUS ? `${h.currency} ${fmt(h.current_value)}<br><span class="text-xs text-gray-500">HKD ${fmt(toHKD(h.current_value))}</span>`
+                           : `${h.currency} ${fmt(h.current_value)}`;
+    const realCell  = isUS ? `${h.currency} ${fmt(h.realized_pnl)}<br><span class="text-xs ${colorize(toHKD(h.realized_pnl))}">HKD ${fmt(toHKD(h.realized_pnl))}</span>`
+                           : `${h.currency} ${fmt(h.realized_pnl)}`;
+    const unreaCell = isUS ? `${h.currency} ${fmt(h.unrealized_pnl)}<br><span class="text-xs ${colorize(toHKD(h.unrealized_pnl))}">HKD ${fmt(toHKD(h.unrealized_pnl))}</span>`
+                           : `${h.currency} ${fmt(h.unrealized_pnl)}`;
+    const totalCell = isUS ? `${h.currency} ${fmt(h.total_pnl)}<br><span class="text-xs ${colorize(toHKD(h.total_pnl))}">HKD ${fmt(toHKD(h.total_pnl))}</span>`
+                           : `${h.currency} ${fmt(h.total_pnl)}`;
+
     const tr = document.createElement('tr');
     tr.className = 'fade-in';
     tr.innerHTML = `
@@ -581,10 +638,10 @@ function renderHoldings(holdings) {
       <td class="px-3 py-2 text-right">${fmt(h.holding_volume, 0)}</td>
       <td class="px-3 py-2 text-right">${fmt(h.avg_cost)}</td>
       <td class="px-3 py-2 text-right">${h.current_price != null ? fmt(h.current_price) : '—'}</td>
-      <td class="px-3 py-2 text-right">${h.currency} ${fmt(h.current_value)}</td>
-      <td class="px-3 py-2 text-right ${colorize(h.realized_pnl)}">${h.currency} ${fmt(h.realized_pnl)}</td>
-      <td class="px-3 py-2 text-right ${colorize(h.unrealized_pnl)}">${h.currency} ${fmt(h.unrealized_pnl)}</td>
-      <td class="px-3 py-2 text-right ${colorize(h.total_pnl)}">${h.currency} ${fmt(h.total_pnl)}</td>
+      <td class="px-3 py-2 text-right">${mktCell}</td>
+      <td class="px-3 py-2 text-right ${colorize(h.realized_pnl)}">${realCell}</td>
+      <td class="px-3 py-2 text-right ${colorize(h.unrealized_pnl)}">${unreaCell}</td>
+      <td class="px-3 py-2 text-right ${colorize(h.total_pnl)}">${totalCell}</td>
       <td class="px-3 py-2 text-center text-xs text-gray-500">${esc(h.price_date || '—')}</td>
     `;
     tbody.appendChild(tr);
