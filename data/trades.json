@@ -18,15 +18,5 @@
     "volume": 10,
     "price": 301,
     "notes": ""
-  },
-  {
-    "id": "e6af19de-1fc2-4e12-b36c-7593e3b79e18",
-    "timestamp": "2026-08-14T06:54:23.293Z",
-    "market": "HK",
-    "symbol": "0992",
-    "type": "BUY",
-    "volume": 1000,
-    "price": 34.06,
-    "notes": ""
   }
 ]
