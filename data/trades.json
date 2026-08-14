@@ -8,5 +8,15 @@
     "volume": 100,
     "price": 131,
     "notes": ""
+  },
+  {
+    "id": "75991fef-73e3-4873-ab7d-7c0b2f6b0400",
+    "timestamp": "2026-08-14T06:21:31.056Z",
+    "market": "US",
+    "symbol": "AAPL",
+    "type": "BUY",
+    "volume": 10,
+    "price": 301,
+    "notes": ""
   }
 ]
