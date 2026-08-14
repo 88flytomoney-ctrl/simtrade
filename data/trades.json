@@ -6,17 +6,7 @@
     "symbol": "00700",
     "type": "BUY",
     "volume": 100,
-    "price": 442.0,
+    "price": 442,
     "notes": "initial HK trade"
-  },
-  {
-    "id": "t2",
-    "timestamp": "2026-08-13T08:01:00Z",
-    "market": "US",
-    "symbol": "AAPL",
-    "type": "BUY",
-    "volume": 10,
-    "price": 302.25,
-    "notes": "initial US trade"
   }
 ]
