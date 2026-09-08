@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-07T22:39:50+08:00",
+  "last_updated": "2026-09-08T09:37:34+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 32.32,
-      "price_date": "2026-09-07",
-      "current_value": 32320.0,
+      "current_price": 32.36,
+      "price_date": null,
+      "current_value": 32360.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -1740.0,
-      "total_pnl": -1740.0
+      "unrealized_pnl": -1700.0,
+      "total_pnl": -1700.0
     },
     "HK:06869": {
       "market": "HK",
@@ -22,7 +22,7 @@
       "holding_volume": 100.0,
       "avg_cost": 131.0,
       "current_price": 175.2,
-      "price_date": "2026-09-07",
+      "price_date": null,
       "current_value": 17520.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
@@ -45,9 +45,9 @@
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 49840.0,
+  "hk_current_value": 49880.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": 2680.0,
+  "hk_unrealized_pnl": 2720.0,
   "us_total_invested": 3010.0,
   "us_current_value": 3199.7,
   "us_realized_pnl": 0.0,
