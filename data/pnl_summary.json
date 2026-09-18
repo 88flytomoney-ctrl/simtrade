@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-17T22:01:09+08:00",
+  "last_updated": "2026-09-18T09:45:43+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 34.32,
-      "price_date": "2026-09-17",
-      "current_value": 34320.0,
+      "current_price": 34.4,
+      "price_date": "2026-09-18",
+      "current_value": 34400.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 260.0,
-      "total_pnl": 260.0
+      "unrealized_pnl": 340.0,
+      "total_pnl": 340.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 184.4,
-      "price_date": "2026-09-17",
-      "current_value": 18440.0,
+      "current_price": 187.7,
+      "price_date": "2026-09-18",
+      "current_value": 18770.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 5340.0,
-      "total_pnl": 5340.0
+      "unrealized_pnl": 5670.0,
+      "total_pnl": 5670.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 331.13,
-      "price_date": "2026-09-17",
-      "current_value": 3311.3,
+      "current_price": 332.41,
+      "price_date": "2026-09-16",
+      "current_value": 3324.1,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 301.3,
-      "total_pnl": 301.3
+      "unrealized_pnl": 314.1,
+      "total_pnl": 314.1
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 52760.0,
+  "hk_current_value": 53170.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": 5600.0,
+  "hk_unrealized_pnl": 6010.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3311.3,
+  "us_current_value": 3324.1,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 301.3
+  "us_unrealized_pnl": 314.1
 }
