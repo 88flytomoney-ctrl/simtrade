@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-14T00:38:53+08:00",
+  "last_updated": "2026-10-14T10:19:56+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 30.96,
-      "price_date": "2026-10-13",
-      "current_value": 30960.0,
+      "current_price": 32.44,
+      "price_date": "2026-10-14",
+      "current_value": 32440.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -3100.0,
-      "total_pnl": -3100.0
+      "unrealized_pnl": -1620.0,
+      "total_pnl": -1620.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 150.6,
-      "price_date": "2026-10-13",
-      "current_value": 15060.0,
+      "current_price": 153.8,
+      "price_date": "2026-10-14",
+      "current_value": 15380.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 1960.0,
-      "total_pnl": 1960.0
+      "unrealized_pnl": 2280.0,
+      "total_pnl": 2280.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 344.62,
+      "current_price": 341.27,
       "price_date": "2026-10-13",
-      "current_value": 3446.2,
+      "current_value": 3412.7,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 436.2,
-      "total_pnl": 436.2
+      "unrealized_pnl": 402.7,
+      "total_pnl": 402.7
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 46020.0,
+  "hk_current_value": 47820.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -1140.0,
+  "hk_unrealized_pnl": 660.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3446.2,
+  "us_current_value": 3412.7,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 436.2
+  "us_unrealized_pnl": 402.7
 }
