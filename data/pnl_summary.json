@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-23T10:10:01+08:00",
+  "last_updated": "2026-10-23T21:59:26+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 22.42,
+      "current_price": 22.64,
       "price_date": "2026-10-23",
-      "current_value": 22420.0,
+      "current_value": 22640.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -11640.0,
-      "total_pnl": -11640.0
+      "unrealized_pnl": -11420.0,
+      "total_pnl": -11420.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 106.6,
+      "current_price": 112.2,
       "price_date": "2026-10-23",
-      "current_value": 10660.0,
+      "current_value": 11220.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -2440.0,
-      "total_pnl": -2440.0
+      "unrealized_pnl": -1880.0,
+      "total_pnl": -1880.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 348.22,
-      "price_date": "2026-10-22",
-      "current_value": 3482.2,
+      "current_price": 349.52,
+      "price_date": "2026-10-23",
+      "current_value": 3495.2,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 472.2,
-      "total_pnl": 472.2
+      "unrealized_pnl": 485.2,
+      "total_pnl": 485.2
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 33080.0,
+  "hk_current_value": 33860.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -14080.0,
+  "hk_unrealized_pnl": -13300.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3482.2,
+  "us_current_value": 3495.2,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 472.2
+  "us_unrealized_pnl": 485.2
 }
