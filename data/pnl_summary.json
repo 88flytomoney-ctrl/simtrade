@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-26T09:57:06+08:00",
+  "last_updated": "2026-10-26T23:41:50+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 21.8,
+      "current_price": 21.74,
       "price_date": "2026-10-26",
-      "current_value": 21800.0,
+      "current_value": 21740.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -12260.0,
-      "total_pnl": -12260.0
+      "unrealized_pnl": -12320.0,
+      "total_pnl": -12320.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 109.4,
+      "current_price": 102.3,
       "price_date": "2026-10-26",
-      "current_value": 10940.0,
+      "current_value": 10230.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -2160.0,
-      "total_pnl": -2160.0
+      "unrealized_pnl": -2870.0,
+      "total_pnl": -2870.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 347.73,
-      "price_date": "2026-10-23",
-      "current_value": 3477.3,
+      "current_price": 345.52,
+      "price_date": "2026-10-26",
+      "current_value": 3455.2,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 467.3,
-      "total_pnl": 467.3
+      "unrealized_pnl": 445.2,
+      "total_pnl": 445.2
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 32740.0,
+  "hk_current_value": 31970.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -14420.0,
+  "hk_unrealized_pnl": -15190.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3477.3,
+  "us_current_value": 3455.2,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 467.3
+  "us_unrealized_pnl": 445.2
 }
