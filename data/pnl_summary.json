@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-29T11:03:32+08:00",
+  "last_updated": "2026-10-29T23:46:17+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 21.98,
+      "current_price": 22.14,
       "price_date": "2026-10-29",
-      "current_value": 21980.0,
+      "current_value": 22140.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -12080.0,
-      "total_pnl": -12080.0
+      "unrealized_pnl": -11920.0,
+      "total_pnl": -11920.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 99.8,
+      "current_price": 101.2,
       "price_date": "2026-10-29",
-      "current_value": 9980.0,
+      "current_value": 10120.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -3120.0,
-      "total_pnl": -3120.0
+      "unrealized_pnl": -2980.0,
+      "total_pnl": -2980.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 343.83,
-      "price_date": "2026-10-28",
-      "current_value": 3438.3,
+      "current_price": 349.15,
+      "price_date": "2026-10-29",
+      "current_value": 3491.5,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 428.3,
-      "total_pnl": 428.3
+      "unrealized_pnl": 481.5,
+      "total_pnl": 481.5
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 31960.0,
+  "hk_current_value": 32260.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -15200.0,
+  "hk_unrealized_pnl": -14900.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3438.3,
+  "us_current_value": 3491.5,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 428.3
+  "us_unrealized_pnl": 481.5
 }
