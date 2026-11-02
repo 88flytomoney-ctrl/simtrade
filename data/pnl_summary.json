@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-02T10:55:32+08:00",
+  "last_updated": "2026-11-03T03:00:32+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 20.38,
+      "current_price": 20.94,
       "price_date": "2026-11-02",
-      "current_value": 20380.0,
+      "current_value": 20940.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -13680.0,
-      "total_pnl": -13680.0
+      "unrealized_pnl": -13120.0,
+      "total_pnl": -13120.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 103.5,
+      "current_price": 107.4,
       "price_date": "2026-11-02",
-      "current_value": 10350.0,
+      "current_value": 10740.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -2750.0,
-      "total_pnl": -2750.0
+      "unrealized_pnl": -2360.0,
+      "total_pnl": -2360.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 344.63,
-      "price_date": "2026-10-30",
-      "current_value": 3446.3,
+      "current_price": 337.22,
+      "price_date": "2026-11-02",
+      "current_value": 3372.2,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 436.3,
-      "total_pnl": 436.3
+      "unrealized_pnl": 362.2,
+      "total_pnl": 362.2
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 30730.0,
+  "hk_current_value": 31680.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -16430.0,
+  "hk_unrealized_pnl": -15480.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3446.3,
+  "us_current_value": 3372.2,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 436.3
+  "us_unrealized_pnl": 362.2
 }
