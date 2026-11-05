@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-05T11:52:58+08:00",
+  "last_updated": "2026-11-06T01:00:18+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 19.25,
+      "current_price": 19.36,
       "price_date": "2026-11-05",
-      "current_value": 19250.0,
+      "current_value": 19360.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -14810.0,
-      "total_pnl": -14810.0
+      "unrealized_pnl": -14700.0,
+      "total_pnl": -14700.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 99.8,
+      "current_price": 96.15,
       "price_date": "2026-11-05",
-      "current_value": 9980.0,
+      "current_value": 9615.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -3120.0,
-      "total_pnl": -3120.0
+      "unrealized_pnl": -3485.0,
+      "total_pnl": -3485.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 349.51,
-      "price_date": "2026-11-04",
-      "current_value": 3495.1,
+      "current_price": 345.13,
+      "price_date": "2026-11-05",
+      "current_value": 3451.3,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 485.1,
-      "total_pnl": 485.1
+      "unrealized_pnl": 441.3,
+      "total_pnl": 441.3
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 29230.0,
+  "hk_current_value": 28975.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -17930.0,
+  "hk_unrealized_pnl": -18185.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3495.1,
+  "us_current_value": 3451.3,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 485.1
+  "us_unrealized_pnl": 441.3
 }
