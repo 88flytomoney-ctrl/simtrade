@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-10T12:54:02+08:00",
+  "last_updated": "2026-11-11T00:42:25+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 19.19,
+      "current_price": 19.01,
       "price_date": "2026-11-10",
-      "current_value": 19190.0,
+      "current_value": 19010.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -14870.0,
-      "total_pnl": -14870.0
+      "unrealized_pnl": -15050.0,
+      "total_pnl": -15050.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 89.1,
+      "current_price": 89.7,
       "price_date": "2026-11-10",
-      "current_value": 8910.0,
+      "current_value": 8970.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -4190.0,
-      "total_pnl": -4190.0
+      "unrealized_pnl": -4130.0,
+      "total_pnl": -4130.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 350.69,
-      "price_date": "2026-11-09",
-      "current_value": 3506.9,
+      "current_price": 347.21,
+      "price_date": "2026-11-10",
+      "current_value": 3472.1,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 496.9,
-      "total_pnl": 496.9
+      "unrealized_pnl": 462.1,
+      "total_pnl": 462.1
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 28100.0,
+  "hk_current_value": 27980.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -19060.0,
+  "hk_unrealized_pnl": -19180.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3506.9,
+  "us_current_value": 3472.1,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 496.9
+  "us_unrealized_pnl": 462.1
 }
