@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-15T23:59:46+08:00",
+  "last_updated": "2026-11-16T11:23:42+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 17.6,
-      "price_date": "2026-11-13",
-      "current_value": 17600.0,
+      "current_price": 16.88,
+      "price_date": "2026-11-16",
+      "current_value": 16880.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -16460.0,
-      "total_pnl": -16460.0
+      "unrealized_pnl": -17180.0,
+      "total_pnl": -17180.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 88.3,
-      "price_date": "2026-11-13",
-      "current_value": 8830.0,
+      "current_price": 82.4,
+      "price_date": "2026-11-16",
+      "current_value": 8240.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -4270.0,
-      "total_pnl": -4270.0
+      "unrealized_pnl": -4860.0,
+      "total_pnl": -4860.0
     },
     "US:AAPL": {
       "market": "US",
@@ -45,9 +45,9 @@
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 26430.0,
+  "hk_current_value": 25120.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -20730.0,
+  "hk_unrealized_pnl": -22040.0,
   "us_total_invested": 3010.0,
   "us_current_value": 3562.7,
   "us_realized_pnl": 0.0,
