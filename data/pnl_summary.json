@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-17T13:24:12+08:00",
+  "last_updated": "2026-11-18T02:01:43+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 16.64,
+      "current_price": 16.52,
       "price_date": "2026-11-17",
-      "current_value": 16640.0,
+      "current_value": 16520.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -17420.0,
-      "total_pnl": -17420.0
+      "unrealized_pnl": -17540.0,
+      "total_pnl": -17540.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 78.5,
+      "current_price": 78.05,
       "price_date": "2026-11-17",
-      "current_value": 7850.0,
+      "current_value": 7805.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -5250.0,
-      "total_pnl": -5250.0
+      "unrealized_pnl": -5295.0,
+      "total_pnl": -5295.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 352.78,
-      "price_date": "2026-11-16",
-      "current_value": 3527.8,
+      "current_price": 350.24,
+      "price_date": "2026-11-17",
+      "current_value": 3502.4,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 517.8,
-      "total_pnl": 517.8
+      "unrealized_pnl": 492.4,
+      "total_pnl": 492.4
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 24490.0,
+  "hk_current_value": 24325.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -22670.0,
+  "hk_unrealized_pnl": -22835.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3527.8,
+  "us_current_value": 3502.4,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 517.8
+  "us_unrealized_pnl": 492.4
 }
