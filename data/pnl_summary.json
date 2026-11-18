@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-18T12:50:52+08:00",
+  "last_updated": "2026-11-19T01:42:52+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 16.77,
+      "current_price": 17.2,
       "price_date": "2026-11-18",
-      "current_value": 16770.0,
+      "current_value": 17200.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -17290.0,
-      "total_pnl": -17290.0
+      "unrealized_pnl": -16860.0,
+      "total_pnl": -16860.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 76.65,
+      "current_price": 79.2,
       "price_date": "2026-11-18",
-      "current_value": 7665.0,
+      "current_value": 7920.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -5435.0,
-      "total_pnl": -5435.0
+      "unrealized_pnl": -5180.0,
+      "total_pnl": -5180.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 351.91,
-      "price_date": "2026-11-17",
-      "current_value": 3519.1,
+      "current_price": 353.64,
+      "price_date": "2026-11-18",
+      "current_value": 3536.4,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 509.1,
-      "total_pnl": 509.1
+      "unrealized_pnl": 526.4,
+      "total_pnl": 526.4
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 24435.0,
+  "hk_current_value": 25120.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -22725.0,
+  "hk_unrealized_pnl": -22040.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3519.1,
+  "us_current_value": 3536.4,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 509.1
+  "us_unrealized_pnl": 526.4
 }
