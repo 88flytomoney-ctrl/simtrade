@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-19T12:41:50+08:00",
+  "last_updated": "2026-11-20T01:53:20+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 16.72,
+      "current_price": 16.25,
       "price_date": "2026-11-19",
-      "current_value": 16720.0,
+      "current_value": 16250.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -17340.0,
-      "total_pnl": -17340.0
+      "unrealized_pnl": -17810.0,
+      "total_pnl": -17810.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 77.15,
+      "current_price": 79.15,
       "price_date": "2026-11-19",
-      "current_value": 7715.0,
+      "current_value": 7915.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -5385.0,
-      "total_pnl": -5385.0
+      "unrealized_pnl": -5185.0,
+      "total_pnl": -5185.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 352.45,
-      "price_date": "2026-11-18",
-      "current_value": 3524.5,
+      "current_price": 349.4,
+      "price_date": "2026-11-19",
+      "current_value": 3494.0,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 514.5,
-      "total_pnl": 514.5
+      "unrealized_pnl": 484.0,
+      "total_pnl": 484.0
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 24435.0,
+  "hk_current_value": 24165.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -22725.0,
+  "hk_unrealized_pnl": -22995.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3524.5,
+  "us_current_value": 3494.0,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 514.5
+  "us_unrealized_pnl": 484.0
 }
