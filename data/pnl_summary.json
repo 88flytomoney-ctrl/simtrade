@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-20T12:32:52+08:00",
+  "last_updated": "2026-11-21T01:27:14+08:00",
   "holdings": {
     "HK:00992": {
       "market": "HK",
@@ -7,13 +7,13 @@
       "currency": "HKD",
       "holding_volume": 1000.0,
       "avg_cost": 34.06,
-      "current_price": 16.6,
+      "current_price": 16.4,
       "price_date": "2026-11-20",
-      "current_value": 16600.0,
+      "current_value": 16400.0,
       "total_bought_cost": 34060.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -17460.0,
-      "total_pnl": -17460.0
+      "unrealized_pnl": -17660.0,
+      "total_pnl": -17660.0
     },
     "HK:06869": {
       "market": "HK",
@@ -21,13 +21,13 @@
       "currency": "HKD",
       "holding_volume": 100.0,
       "avg_cost": 131.0,
-      "current_price": 73.6,
+      "current_price": 72.2,
       "price_date": "2026-11-20",
-      "current_value": 7360.0,
+      "current_value": 7220.0,
       "total_bought_cost": 13100.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": -5740.0,
-      "total_pnl": -5740.0
+      "unrealized_pnl": -5880.0,
+      "total_pnl": -5880.0
     },
     "US:AAPL": {
       "market": "US",
@@ -35,21 +35,21 @@
       "currency": "USD",
       "holding_volume": 10.0,
       "avg_cost": 301.0,
-      "current_price": 349.21,
-      "price_date": "2026-11-19",
-      "current_value": 3492.1,
+      "current_price": 345.67,
+      "price_date": "2026-11-20",
+      "current_value": 3456.7,
       "total_bought_cost": 3010.0,
       "realized_pnl": 0.0,
-      "unrealized_pnl": 482.1,
-      "total_pnl": 482.1
+      "unrealized_pnl": 446.7,
+      "total_pnl": 446.7
     }
   },
   "hk_total_invested": 47160.0,
-  "hk_current_value": 23960.0,
+  "hk_current_value": 23620.0,
   "hk_realized_pnl": 0.0,
-  "hk_unrealized_pnl": -23200.0,
+  "hk_unrealized_pnl": -23540.0,
   "us_total_invested": 3010.0,
-  "us_current_value": 3492.1,
+  "us_current_value": 3456.7,
   "us_realized_pnl": 0.0,
-  "us_unrealized_pnl": 482.1
+  "us_unrealized_pnl": 446.7
 }
